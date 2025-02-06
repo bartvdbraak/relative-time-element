@@ -132,7 +132,7 @@ interface RoundingOpts {
   relativeTo: Date | number
 }
 
-export function roundToSingleUnit(duration: Duration, {relativeTo = Date.now()}: Partial<RoundingOpts> = {}): Duration {
+export function roundToSingleUnit(duration: Duration, { relativeTo = Date.now() }: Partial<RoundingOpts> = {}): Duration {
   relativeTo = new Date(relativeTo)
   if (duration.blank) return duration
   const sign = duration.sign
@@ -145,22 +145,22 @@ export function roundToSingleUnit(duration: Duration, {relativeTo = Date.now()}:
   let seconds = Math.abs(duration.seconds)
   let milliseconds = Math.abs(duration.milliseconds)
 
-  if (milliseconds >= 900) seconds += Math.round(milliseconds / 1000)
+  if (milliseconds >= 900) seconds += Math.floor(milliseconds / 1000)
   if (seconds || minutes || hours || days || weeks || months || years) {
     milliseconds = 0
   }
 
-  if (seconds >= 55) minutes += Math.round(seconds / 60)
+  if (seconds >= 55) minutes += Math.floor(seconds / 60)
   if (minutes || hours || days || weeks || months || years) seconds = 0
 
-  if (minutes >= 55) hours += Math.round(minutes / 60)
+  if (minutes >= 55) hours += Math.floor(minutes / 60)
   if (hours || days || weeks || months || years) minutes = 0
 
-  if (days && hours >= 12) days += Math.round(hours / 24)
-  if (!days && hours >= 21) days += Math.round(hours / 24)
+  if (days && hours >= 12) days += Math.floor(hours / 24)
+  if (!days && hours >= 21) days += Math.floor(hours / 24)
   if (days || weeks || months || years) hours = 0
 
-  // Resolve calendar dates
+  // Resolve calendar dates more conservatively
   const currentYear = relativeTo.getFullYear()
   const currentMonth = relativeTo.getMonth()
   const currentDate = relativeTo.getDate()
@@ -178,11 +178,12 @@ export function roundToSingleUnit(duration: Duration, {relativeTo = Date.now()}:
     newDate.setDate(currentDate - monthDateCorrection + days * sign)
     const yearDiff = newDate.getFullYear() - relativeTo.getFullYear()
     const monthDiff = newDate.getMonth() - relativeTo.getMonth()
-    const daysDiff = Math.abs(Math.round((Number(newDate) - Number(relativeTo)) / 86400000)) + monthDateCorrection
+    const daysDiff = Math.abs(Math.floor((Number(newDate) - Number(relativeTo)) / 86400000)) + monthDateCorrection
     const monthsDiff = Math.abs(yearDiff * 12 + monthDiff)
+
     if (daysDiff < 27) {
       if (days >= 6) {
-        weeks += Math.round(days / 7)
+        weeks += Math.floor(days / 7)
         days = 0
       } else {
         days = daysDiff
@@ -199,10 +200,10 @@ export function roundToSingleUnit(duration: Duration, {relativeTo = Date.now()}:
   }
   if (years) months = 0
 
-  if (weeks >= 4) months += Math.round(weeks / 4)
+  if (weeks >= 4) months += Math.floor(weeks / 4)
   if (months || years) weeks = 0
   if (days && weeks && !months && !years) {
-    weeks += Math.round(days / 7)
+    weeks += Math.floor(days / 7)
     days = 0
   }
 
